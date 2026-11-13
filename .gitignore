@@ -1,0 +1,32 @@
+# Секреты и локальные настройки
+.env
+.env.*
+!.env.example
+
+# База данных
+*.db
+*.sqlite3
+brodobrey.db
+
+# Виртуальное окружение
+venv/
+.venv/
+
+# Кэш Python
+__pycache__/
+*.pyc
+
+# Логи
+logs/
+
+# Мусор ОС и IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Архивы и бинарники
+*.zip
+*.exe
+brodobrey_deploy.zip
+ngrok.exe
+ngrok.zip

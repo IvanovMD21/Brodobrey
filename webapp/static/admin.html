@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Brodobrey Admin</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg: var(--tg-theme-bg-color, #ffffff);
+            --bg2: var(--tg-theme-secondary-bg-color, #f4f4f5);
+            --text: var(--tg-theme-text-color, #000000);
+            --hint: var(--tg-theme-hint-color, #8e8e93);
+            --btn: var(--tg-theme-button-color, #3390ec);
+            --btn-text: var(--tg-theme-button-text-color, #ffffff);
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --radius: 12px;
+            --nav-height: 64px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 15px;
+            line-height: 1.4;
+            padding: 12px 12px calc(var(--nav-height) + 16px + env(safe-area-inset-bottom));
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding: 0 4px;
+        }
+
+        /* ─── Верхние табы ─────────────────────────────── */
+        .tabs-top {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .tabs-top::-webkit-scrollbar { display: none; }
+
+        .tab-top {
+            flex-shrink: 0;
+            padding: 7px 14px;
+            border-radius: 18px;
+            border: none;
+            white-space: nowrap;
+            background: var(--bg2);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.15s, color 0.15s;
+        }
+        .tab-top.active {
+            background: var(--btn);
+            color: var(--btn-text);
+        }
+
+        /* ─── Карточки ─────────────────────────────────── */
+        .card {
+            background: var(--bg2);
+            border-radius: var(--radius);
+            padding: 12px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .card .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .card .title {
+            font-weight: 600;
+            font-size: 14px;
+            flex: 1;
+            min-width: 0;
+            word-break: break-word;
+        }
+
+        .card .sub {
+            font-size: 12px;
+            color: var(--hint);
+            margin-top: 4px;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        /* ─── Бейджи статуса ───────────────────────────── */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .badge.pending   { background: var(--warning); color: #000; }
+        .badge.confirmed { background: var(--success); color: #fff; }
+        .badge.completed { background: #6b7280; color: #fff; }
+        .badge.canceled  { background: var(--danger); color: #fff; }
+
+        /* ─── Кнопки ───────────────────────────────────── */
+        .actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 9px 10px;
+            border-radius: 10px;
+            border: none;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.15s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .btn:active { opacity: 0.7; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-primary   { background: var(--btn); color: var(--btn-text); }
+        .btn-danger    { background: var(--danger); color: #fff; }
+        .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--hint); }
+
+        /* ─── Поля ввода ───────────────────────────────── */
+        .input-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .input-row input {
+            flex: 1;
+            min-width: 0;
+            padding: 9px 11px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+        }
+        .input-row input:focus { border-color: var(--btn); }
+        .input-row input::placeholder { color: var(--hint); }
+
+        .input-row .btn {
+            flex: 0 0 auto;
+            padding: 9px 14px;
+        }
+
+        /* ─── Выручка ──────────────────────────────────── */
+        .revenue-card {
+            text-align: center;
+            padding: 20px 16px;
+        }
+        .revenue-num {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 6px 0;
+            color: var(--btn);
+        }
+        .revenue-label {
+            font-size: 12px;
+            color: var(--hint);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ─── Состояния ────────────────────────────────── */
+        .empty, .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--hint);
+            font-size: 14px;
+        }
+
+        /* ─── Нижняя навигация ─────────────────────────── */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            background: var(--bg);
+            border-top: 1px solid var(--bg2);
+            padding: 4px 0;
+            padding-bottom: calc(4px + env(safe-area-inset-bottom));
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 6px 2px;
+            font-size: 10px;
+            color: var(--hint);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            font-weight: 500;
+            transition: color 0.15s;
+        }
+        .nav-btn.active { color: var(--btn); }
+        .nav-btn:active { opacity: 0.6; }
+
+        .nav-icon {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        /* ─── Toast ────────────────────────────────────── */
+        .toast {
+            position: fixed;
+            bottom: calc(var(--nav-height) + 20px + env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.25s, transform 0.25s;
+            pointer-events: none;
+            max-width: calc(100vw - 40px);
+            text-align: center;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ─── Мелкие правки ────────────────────────────── */
+        .divider {
+            height: 1px;
+            background: var(--bg2);
+            margin: 12px 0;
+        }
+
+        @media (max-width: 360px) {
+            .nav-btn { font-size: 9px; }
+            .nav-icon { font-size: 18px; }
+            body { padding-left: 10px; padding-right: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="content"><div class="loading">Загрузка...</div></div>
+
+    <div class="bottom-nav">
+        <button class="nav-btn active" onclick="switchTab('appointments', this)">
+            <span class="nav-icon">📋</span>Записи
+        </button>
+        <button class="nav-btn" onclick="switchTab('clients', this)">
+            <span class="nav-icon">👥</span>Клиенты
+        </button>
+        <button class="nav-btn" onclick="switchTab('barbers', this)">
+            <span class="nav-icon">👨‍🦰</span>Барберы
+        </button>
+        <button class="nav-btn" onclick="switchTab('revenue', this)">
+            <span class="nav-icon">💰</span>Выручка
+        </button>
+        <button class="nav-btn" onclick="switchTab('services', this)">
+            <span class="nav-icon">💵</span>Прайс
+        </button>
+        <button class="nav-btn" onclick="switchTab('waitlist', this)">
+            <span class="nav-icon">⏳</span>Ожидание
+        </button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        tg.setHeaderColor('secondary_bg_color');
+        const initData = tg.initData;
+        let currentTab = 'appointments';
+        let currentFilter = 'today';
+
+        async function api(path, method = 'GET', body = null) {
+            const opts = { method, headers: { 'X-Init-Data': initData } };
+            if (body) {
+                opts.headers['Content-Type'] = 'application/json';
+                opts.body = JSON.stringify(body);
+            }
+            const res = await fetch(path, opts);
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ detail: 'Ошибка' }));
+                throw new Error(err.detail || `HTTP ${res.status}`);
+            }
+            return res.json();
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        function esc(s) {
+            if (s === null || s === undefined) return '—';
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function statusBadge(status) {
+            const map = {
+                pending: '⏳ Ожидает',
+                confirmed: '✅ Подтв.',
+                completed: '🏁 Заверш.',
+                canceled: '❌ Отмена',
+            };
+            return `<span class="badge ${status}">${map[status] || status}</span>`;
+        }
+
+        function switchTab(name, btn) {
+            currentTab = name;
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderTab();
+        }
+
+        async function renderTab() {
+            const c = document.getElementById('content');
+            c.innerHTML = '<div class="loading">Загрузка...</div>';
+            try {
+                if (currentTab === 'appointments') await renderAppointments(c);
+                else if (currentTab === 'clients') await renderClients(c);
+                else if (currentTab === 'barbers') await renderBarbers(c);
+                else if (currentTab === 'revenue') await renderRevenue(c);
+                else if (currentTab === 'services') await renderServices(c);
+                else if (currentTab === 'waitlist') await renderWaitlist(c);
+            } catch (e) {
+                c.innerHTML = `<div class="empty">Ошибка: ${esc(e.message)}</div>`;
+            }
+        }
+
+        // ─── ЗАПИСИ ──────────────────────────────────────
+        async function renderAppointments(c) {
+            const filters = [
+                { key: 'today', label: 'Сегодня' },
+                { key: 'pending', label: '⏳ Ожидают' },
+                { key: 'confirmed', label: '✅ Подтв.' },
+                { key: 'completed', label: '🏁 Заверш.' },
+                { key: 'canceled', label: '❌ Отменённые' },
+                { key: 'all', label: '🌐 Все' },
+            ];
+            let html = '<div class="tabs-top">';
+            filters.forEach(f => {
+                html += `<button class="tab-top ${currentFilter === f.key ? 'active' : ''}"
+                    onclick="currentFilter='${f.key}';renderTab()">${f.label}</button>`;
+            });
+            html += '</div>';
+
+            const data = await api(`/api/admin/appointments?status=${currentFilter}`);
+            if (!data.appointments.length) {
+                c.innerHTML = html + '<div class="empty">Записей нет</div>';
+                return;
+            }
+            html += data.appointments.map(a => {
+                const canCancel = ['pending', 'confirmed'].includes(a.status);
+                return `
+                <div class="card">
+                    <div class="row">
+                        <div class="title">${esc(a.datetime)}</div>
+                        ${statusBadge(a.status)}
+                    </div>
+                    <div class="sub">✂️ ${esc(a.service)} · 💈 ${esc(a.barber)} · ${esc(a.price)}₽ · ${a.payment === 'prepaid' ? '💳' : '💵'}</div>
+                    <div class="sub">👤 ${esc(a.user)} · 📱 ${esc(a.phone)}</div>
+                    ${canCancel ? `
+                    <div class="actions">
+                        <button class="btn btn-danger" onclick="cancelAppt(${a.id})">❌ Отменить</button>
+                    </div>` : ''}
+                </div>`;
+            }).join('');
+            c.innerHTML = html;
+        }
+
+        async function cancelAppt(id) {
+            if (!confirm('Отменить запись?')) return;
+            try {
+                await api('/api/admin/appointment/cancel', 'POST', { appointment_id: id });
+                showToast('Запись отменена');
+                renderTab();
+            } catch (e) {
+                showToast('Ошибка: ' + e.message);
+            }
+        }
+
+        // ─── КЛИЕНТЫ ─────────────────────────────────────
+        async function renderClients(c) {
+            const data = await api('/api/admin/clients');
+            if (!data.clients.length) {
+                c.innerHTML = '<div class="empty">Клиентов нет</div>';
+                return;
+            }
+            c.innerHTML = data.clients.map(u => `
+                <div class="card">
+                    <div class="row">
+                        <div class="title">${u.is_blocked ? '🚫 ' : ''}${esc(u.name)}</div>
+                    </div>
+                    <div class="sub">📱 ${esc(u.phone)} · с ${esc(u.created_at)}</div>
+                    <div class="actions">
+                        <button class="btn ${u.is_blocked ? 'btn-primary' : 'btn-danger'}"
+                            onclick="toggleBlock(${u.id})">
+                            ${u.is_blocked ? '✅ Разблокировать' : '🚫 Заблокировать'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function toggleBlock(id) {
+            try {
+                const r = await api('/api/admin/client/toggle_block', 'POST', { user_id: id });
+                showToast(r.is_blocked ? 'Заблокирован' : 'Разблокирован');
+                renderTab();
+            } catch (e) {
+                showToast('Ошибка: ' + e.message);
+            }
+        }
+
+        // ─── БАРБЕРЫ ─────────────────────────────────────
+        async function renderBarbers(c) {
+            const data = await api('/api/admin/barbers');
+            let html = `
+                <div class="card">
+                    <div class="title">➕ Добавить барбера</div>
+                    <div class="input-row">
+                        <input id="new-barber-name" placeholder="Имя" />
+                        <input id="new-barber-nick" placeholder="Ник" />
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-primary" onclick="addBarber()">Добавить</button>
+                    </div>
+                </div>
+            `;
+            html += data.barbers.map(b => `
+                <div class="card">
+                    <div class="row">
+                        <div class="title">${b.is_active ? '' : '🚫 '}${esc(b.name)} («${esc(b.nickname)}»)</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn ${b.is_active ? 'btn-danger' : 'btn-primary'}"
+                            onclick="toggleBarber(${b.id})">
+                            ${b.is_active ? '❌ Деактивировать' : '✅ Активировать'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            c.innerHTML = html;
+        }
+
+        async function addBarber() {
+            const name = document.getElementById('new-barber-name').value.trim();
+            const nick = document.getElementById('new-barber-nick').value.trim();
+            if (name.length < 2 || nick.length < 1) {
+                showToast('Заполните имя и ник');
+                return;
+            }
+            try {
+                await api('/api/admin/barber/add', 'POST', { name, nickname: nick });
+                showToast('Барбер добавлен');
+                renderTab();
+            } catch (e) {
+                showToast('Ошибка: ' + e.message);
+            }
+        }
+
+        async function toggleBarber(id) {
+            try {
+                await api('/api/admin/barber/toggle', 'POST', { barber_id: id });
+                renderTab();
+            } catch (e) {
+                showToast('Ошибка: ' + e.message);
+            }
+        }
+
+        // ─── ВЫРУЧКА ─────────────────────────────────────
+        async function renderRevenue(c) {
+            const data = await api('/api/admin/revenue');
+            c.innerHTML = `
+                <div class="card revenue-card">
+                    <div class="revenue-label">Сегодня</div>
+                    <div class="revenue-num">${esc(data.today)}₽</div>
+                    <div class="revenue-label">${esc(data.count_today)} записей</div>
+                </div>
+                <div class="card revenue-card">
+                    <div class="revenue-label">За неделю</div>
+                    <div class="revenue-num">${esc(data.week)}₽</div>
+                </div>
+                <div class="card revenue-card">
+                    <div class="revenue-label">За месяц</div>
+                    <div class="revenue-num">${esc(data.month)}₽</div>
+                </div>
+            `;
+        }
+
+        // ─── ПРАЙС ───────────────────────────────────────
+        async function renderServices(c) {
+            const data = await api('/api/admin/services');
+            c.innerHTML = data.services.map(s => `
+                <div class="card">
+                    <div class="row">
+                        <div class="title">${esc(s.name)}</div>
+                        <div style="font-weight:600;white-space:nowrap;">${esc(s.price)}₽</div>
+                    </div>
+                    <div class="sub">${esc(s.duration_min)} мин</div>
+                    <div class="input-row">
+                        <input type="number" id="price-${s.id}" value="${s.price}" placeholder="Новая цена" />
+                        <button class="btn btn-primary" onclick="savePrice(${s.id})">💾</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function savePrice(id) {
+            const price = parseInt(document.getElementById('price-' + id).value);
+            if (!price || price <= 0) {
+                showToast('Неверная цена');
+                return;
+            }
+            try {
+                await api('/api/admin/service/price', 'POST', { service_id: id, price });
+                showToast('Цена обновлена');
+            } catch (e) {
+                showToast('Ошибка: ' + e.message);
+            }
+        }
+
+        // ─── ЛИСТ ОЖИДАНИЯ ───────────────────────────────
+        async function renderWaitlist(c) {
+            const data = await api('/api/admin/waitlist');
+            if (!data.entries.length) {
+                c.innerHTML = '<div class="empty">Лист ожидания пуст</div>';
+                return;
+            }
+            c.innerHTML = data.entries.map(w => `
+                <div class="card">
+                    <div class="title">👤 ${esc(w.user_name)}</div>
+                    <div class="sub">📱 ${esc(w.user_phone)} · 📅 ${esc(w.preferred_date)}</div>
+                </div>
+            `).join('');
+        }
+
+        // Старт
+        renderTab();
+    </script>
+</body>
+</html>
