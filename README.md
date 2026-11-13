@@ -180,3 +180,14 @@ powershell
 .\ngrok.exe http 8000
 Все три окна должны быть открыты одновременно.# Brodobrey
 # Brodobrey
+<img width="350" height="384" alt="Снимок экрана 2026-11-13 140615" src="https://github.com/user-attachments/assets/112a7903-42a9-401b-96e1-02e5b5a17e2f" />
+
+<img width="398" height="704" alt="Снимок экрана 2026-11-13 140720" src="https://github.com/user-attachments/assets/8b789f56-461c-48b0-b6de-48de8f1474a1" />
+
+<img width="239" height="183" alt="Снимок экрана 2026-11-13 140705" src="https://github.com/user-attachments/assets/d9604ba8-d071-4a6a-b95c-f15a1de44997" />
+
+<img width="1620" height="892" alt="Снимок экрана 2026-11-13 140654" src="https://github.com/user-attachments/assets/ed773efd-05cd-4f64-8ba4-f30f05fa7782" />
+
+<img width="396" height="487" alt="Снимок экрана 2026-11-13 140637" src="https://github.com/user-attachments/assets/86b44179-e8ab-46c9-85e2-ea5a8079c70f" />
+
+
